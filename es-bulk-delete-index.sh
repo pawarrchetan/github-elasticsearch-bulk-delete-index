@@ -20,6 +20,7 @@ function es_index_list(){
 }
 
 function es_index_delete(){
+  echo "$1"
   curl -s -u "$ES_TOKEN" -X DELETE "$ES_ENDPOINT/$1?pretty"
 }
 
