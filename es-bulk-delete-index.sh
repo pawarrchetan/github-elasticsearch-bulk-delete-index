@@ -6,7 +6,6 @@ export ES_TOKEN="YOUR_TOKEN"
 
 function es_index_list(){
   indexes=`curl -s -u "$ES_TOKEN" "$ES_ENDPOINT$ES_API" | awk '{print $3}' | egrep "kube|audit" | sort -nr`
-
   for index in $indexes;
     do
       retention_date=`date --date="$1 days ago" +%Y%m%d`
@@ -30,9 +29,16 @@ if [ $# -eq 0 ]
     echo "The script requires 1 argument which is the number of days for the indexes to be retained elasticsearch."
     echo "Example : ./es-bulk-delete-index.sh 4"
 else
-  es_index_list $1
-  index_list=$(cat $PWD/index_list.lst)
-  for ind in $index_list; do (es_index_delete "$ind"); done
-  #for ind in $index_list; do (echo "$ind"); done
-  rm -rf $PWD/index_list.lst
+    es_index_list $1
+    if [ -f $PWD/index_list.lst ];
+    then
+      index_list=$(cat $PWD/index_list.lst)
+      number_of_indexes=`cat $PWD/index_list.lst | wc -l`
+      echo "$number_of_indexes to delete...!!!"
+      for ind in $index_list; do (es_index_delete "$ind"); done
+      # for ind in $index_list; do (echo "$ind"); done
+      rm -rf $PWD/index_list.lst
+    else
+      echo "Nothing to delete now...!!!"
+    fi
 fi  
